@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+{% block title %}{{title}}{% endblock %}
+{% block head %}
+  {{ super() }}
+{% endblock %}
+{% block page %}{{title}}{% endblock %}
+{% block heading %}
+  {{ super() }}
+{% endblock %}
+{% block content %}
+  <form action="/process" method="post" enctype="multipart/form-data">
+      <p><input type="file" name="file">
+         <input type="submit" value="Upload">
+         <p class="formpara"><label for="system">System : </label><select class="selectitem" name="system" id="system" >
+    {% for type in types %}
+        {% set sel=''%}
+        {% if type[0]|string == selected %}
+        {% set sel='SELECTED="SELECTED"' %}
+        {% endif %}
+        <option value="{{type[0]}}" {{sel}}>{{type[1]}}</option>
+    {% endfor %}
+</select></p>
+{%for vd in vds %}
+<p class="formpara"><label for="{{vd}}">VD1 : </label><select class="selectitem" name="{{vd}}" id="{{vd}}" >
+</select></p>
+{%endfor%}       
+    </form>
+  {% block footer %}
+  {{super()}}
+  {% endblock %}
+{% endblock %}

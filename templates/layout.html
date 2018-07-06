@@ -1,0 +1,79 @@
+{% from "macros.html" import nav_link with context %}
+<!DOCTYPE html>
+<html>
+  <head>
+    {% block head %}
+      <title>{% block title %}{% endblock %} - Resultatarkiv</title>
+    {% endblock %}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <style type="text/css">
+      .container {
+        max-width: 700px;
+      }
+      .disptable  { display: table;      }
+	  .formpara     { display: table-row;  }
+      label { display: table-cell; }
+	  input { display: table-cell; }
+      h2 {color: red;}
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-inverse" role="navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">Home</a>
+          {{ nav_link('upload', 'Last opp') }}
+        </div>
+
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav">
+            <ul class="nav navbar-nav navbar-right">
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Rediger data <b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                 <li><a href="/metadata">Metadatatyper</a></li>
+                  <li><a href="/quantity">Numeriske enheter</a></li>
+                  <li><a href="/project">Prosjekter</a></li>
+                  <li><a href="/topic">Prosjektområder</a></li>
+                  <li><a href="/nuclide">Nuklider</a></li>
+                  <li><a href="/species">Arter</a></li>
+                  <li><a href="/sampletype">Prøvetyper</a></li>
+                  <li><a href="/samplecat">Prøvekategorier</a></li>
+                  <li><a href="/habitat">Habitater</a></li>
+                  <li><a href="/newuser">Ny bruker</a></li>
+                
+              </ul>
+             </li>
+          </ul>
+          
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+    </nav>
+    <div class="container">
+      {% block heading %}
+        <h1>{% block page %}{% endblock %}</h1>
+      {% endblock %}
+      <br>
+      {% block content %}{% endblock %}
+      <br>
+      <br>
+      <div class="footer">
+        {% block footer %}
+          <br>
+          <br>
+          <br>
+        {% endblock %}
+      </div>
+    </div>
+    <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+  </body>
+</html>
