@@ -118,8 +118,17 @@ insert into system(name,description) values('NRPA-Østerås','RS-701');
 insert into system(name,description) values('NRPA-Svanhovd','RS-701');
 
 insert into detector(systemid,name,type,volumeliter) (select id,'Total','NaI',16 from system where name='330-1');
+
 insert into detector(systemid,name,type,volumeliter) (select id,'Total','NaI',8 from system where name='NRPA-Østerås');
 insert into detector(systemid,name,type,volumeliter) (select id,'Left','NaI',4 from system where name='NRPA-Østerås');
 insert into detector(systemid,name,type,volumeliter) (select id,'Right','NaI',4 from system where name='NRPA-Østerås');
 insert into detector(systemid,name,type,volumeliter) (select id,'3"','NaI',1 from system where name='NRPA-Østerås');
 insert into detector(systemid,name,type,volumeliter) (select id,'Nøytron','Nøytron',0 from system where name='NRPA-Østerås');
+insert into detector(systemid,name,type,volumeliter) (select id,'Total','NaI',16 from system where name='330-2');
+insert into detector(systemid,name,type,volumeliter) (select id,'Total','NaI',8 from system where name='NRPA-Svanhovd');
+insert into detector(systemid,name,type,volumeliter) (select id,'Left','NaI',4 from system where name='NRPA-Svanhovd');
+insert into detector(systemid,name,type,volumeliter) (select id,'Right','NaI',4 from system where name='NRPA-Svanhovd');
+insert into detector(systemid,name,type,volumeliter) (select id,'Down','NaI',4 from system where name='NRPA-25l');
+insert into detector(systemid,name,type,volumeliter) (select id,'Up','NaI',4 from system where name='NRPA-25l');
+insert into detector(systemid,name,type,volumeliter) (select id,'Down','NaI',4 from system where name='NGU');
+insert into detector(systemid,name,type,volumeliter) (select id,'Up','NaI',4 from system where name='NGU');

@@ -2,6 +2,8 @@
 {% block title %}{{title}}{% endblock %}
 {% block head %}
   {{ super() }}
+  <script type="text/javascript" src="{{ url_for('static', filename='upload.js') }}"></script>
+
 {% endblock %}
 {% block page %}{{title}}{% endblock %}
 {% block heading %}
@@ -12,18 +14,28 @@
       <p><input type="file" name="file">
          <input type="submit" value="Upload">
          <p class="formpara"><label for="system">System : </label><select class="selectitem" name="system" id="system" >
-    {% for type in types %}
+         <option value="0"></option>
+    {% for system in systems %}
         {% set sel=''%}
-        {% if type[0]|string == selected %}
+        {% if system[0]|string == selected %}
         {% set sel='SELECTED="SELECTED"' %}
         {% endif %}
-        <option value="{{type[0]}}" {{sel}}>{{type[1]}}</option>
+        <option value="{{system[0]}}" {{sel}}>{{system[1]}}</option>
     {% endfor %}
 </select></p>
 {%for vd in vds %}
-<p class="formpara"><label for="{{vd}}">VD1 : </label><select class="selectitem" name="{{vd}}" id="{{vd}}" >
+<p class="formpara"><label for="{{vd}}">{{vd}} : </label><select class="selectitem vds" name="{{vd}}" id="{{vd}}" >
 </select></p>
 {%endfor%}       
+<p class="formpara"><label for="project">Prosjekt : </label><select class="selectitem" name="project" id="project" >
+<option value="0"></option>
+{% for system in projects %}
+   <option value="{{system[0]}}" >{{system[1]}}</option>
+{% endfor %}
+</select> <input name="project_new" id="project_new" value=""/></p>
+<p class="formpara"><label for="survey">Survey : </label><select class="selectitem" name="survey" id="survey" >
+</select> <input name="survey_new" id="survey_new" value=""/></p>
+
     </form>
   {% block footer %}
   {{super()}}

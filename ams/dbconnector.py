@@ -30,8 +30,11 @@ class dbconnector:
         return(authOK)
 
         
-    def fetchlist(self,sql):
-        self.cursor.execute(sql)
+    def fetchlist(self,sql,params=None):
+        if params==None:
+            self.cursor.execute(sql)
+        else:
+            self.cursor.execute(sql,params)
         list=[]
         row = self.cursor.fetchone()
         while row is not None:
@@ -42,8 +45,8 @@ class dbconnector:
     def listnames(self,table):
         sql = "select id,name from "+table+" order by name"
         self.cursor.execute(sql)
-        table=self.cursor.fetchall()
-        return(table)
+        namelist=self.cursor.fetchall()
+        return(namelist)
             
     def fetchdict(self,sql,params=None):
         if self.cursor==None:
@@ -56,7 +59,7 @@ class dbconnector:
         results=[]
         for row in self.cursor.fetchall():
             results.append(dict(zip(columns, row)))
-        return(results)
+        return(results) 
         
     def connecttodb(self):
         config=configparser.ConfigParser()
@@ -86,7 +89,7 @@ class dbconnector:
                         try:
                             if statement=='':
                                 continue
-                            if statement
+                            # if statement contains "drop" 
                             self.cursor.execute(statement)
                             self.cursor.commit()
                         except pyodbc.ProgrammingError as e:
