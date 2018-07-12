@@ -21,7 +21,7 @@ alter table project add constraint UK_projectname unique  (name);
 create table survey(
     id integer primary key not null IDENTITY(1,1),
     name varchar(100) not null,
-    startup datetime not null,
+    startup datetime,
     systemid integer not null references system(id),
     projectid integer references project(id),  
     description text,

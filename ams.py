@@ -21,7 +21,27 @@ app.config.update(
 app.jinja_env.trim_blocks = True
 app.jinja_env.lstrip_blocks = True
 
-
+@app.route("/process", methods=['GET', 'POST'])
+def process():
+    print(request.form)
+    db=dbconnector()
+    db.connecttodb() 
+    if request.form["project_new"] != '':
+        name=request.form["project_new"]
+        sql="insert into project (name) values(?)"
+        db.insert(sql,name)
+        projectid=db.name2id(name,"project")
+    else:
+        projectid=request.form["project"]
+    if request.form["survey_new"] != '':
+        name=request.form["survey_new"]
+        sql="insert into survey (name,projectid,systemid) values(?,?,?)"
+        db.insert(sql,[name,projectid,request.form["system"]])
+        surveyid=db.name2id(name,"survey")
+    else:
+        surveyid=request.form["survey"]
+        # Create a new survey 
+    return(str(request.form)+'<a href="/">back</a>')
 
 @app.route("/upload", methods=['GET', 'POST'])
 def upload():
@@ -30,7 +50,6 @@ def upload():
     system.connecttodb()
     systems=system.listnames('system')
     projects=system.listnames('project')
-    print(projects)
     if request.method == 'POST':
     
         file = request.files['file']
@@ -70,7 +89,17 @@ def detectors():
     print(request.args)
     systemid=request.args.get('systemid')
     systems=system.fetchdict('select id,name from detector where systemid=?',params=systemid)
+    return(jsonify(systems))
+
+# TODO: Rewrite to common eventhandler
     
+@app.route('/ajax/surveys',methods=["GET", "POST"])
+def surveys():
+    system=dbconnector()
+    system.connecttodb()
+    print(request.args)
+    projectid=request.args.get('projectid')
+    systems=system.fetchdict('select id,name from survey where projectid=?',params=projectid)
     return(jsonify(systems))
 
     

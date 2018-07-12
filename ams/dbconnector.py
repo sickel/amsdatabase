@@ -130,5 +130,17 @@ class dbconnector:
                 d[col]=None
         return d
     
+    def insert(self,sql,params):
+        if self.cursor==None:
+            self.connecttodb()
+        self.cursor.execute(sql,params)
+        self.cursor.commit()
+        return(True)
     
-    
+    def name2id(self,name,table=None):
+        if table==None:
+            table=self.tablename
+        sql="select id from "+table+" where name =?"
+        self.cursor.execute(sql,name)
+        list=self.cursor.fetchall()
+        return(list[0][0])
