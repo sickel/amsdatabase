@@ -4,6 +4,12 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user ,current_user
 import platform
 from ams.dbconnector import dbconnector
+from ams.uploadfile import csvfile
+from werkzeug import secure_filename
+from inspect import currentframe, getframeinfo
+# print(getframeinfo(currentframe()).lineno)
+
+
 
 if platform.system()=='Windows':
 	UPLOAD_FOLDER = 'c:/windows/temp/'
@@ -11,6 +17,12 @@ else:
 	UPLOAD_FOLDER = '/tmp'
 	
 ALLOWED_EXTENSIONS = set(['csv'])
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+
+
 
 
 app = Flask(__name__)
@@ -23,7 +35,7 @@ app.jinja_env.lstrip_blocks = True
 
 @app.route("/process", methods=['GET', 'POST'])
 def process():
-    print(request.form)
+    req=dict(request.form)
     db=dbconnector()
     db.connecttodb() 
     if request.form["project_new"] != '':
@@ -31,6 +43,7 @@ def process():
         sql="insert into project (name) values(?)"
         db.insert(sql,name)
         projectid=db.name2id(name,"project")
+        req['project']=projectid
     else:
         projectid=request.form["project"]
     if request.form["survey_new"] != '':
@@ -38,9 +51,20 @@ def process():
         sql="insert into survey (name,projectid,systemid) values(?,?,?)"
         db.insert(sql,[name,projectid,request.form["system"]])
         surveyid=db.name2id(name,"survey")
+        req['survey']=surveyid
     else:
         surveyid=request.form["survey"]
-        # Create a new survey 
+    if request.method == 'POST':
+        file = request.files['file']
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            filepath =os.path.join(app.config['UPLOAD_FOLDER'], filename) 
+            file.save(filepath)
+            file=csvfile(filepath,req)
+            if not(file.finished):
+                file.importdata()
+                
+
     return(str(request.form)+'<a href="/">back</a>')
 
 @app.route("/upload", methods=['GET', 'POST'])
@@ -51,12 +75,12 @@ def upload():
     systems=system.listnames('system')
     projects=system.listnames('project')
     if request.method == 'POST':
-    
         file = request.files['file']
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect(url_for('index'))
+            
+            return redirect(url_for('/'))
 
     return render_template('upload.html', title="Last opp csv-fil",vds=vds,systems=systems,projects=projects)
 

@@ -64,7 +64,6 @@ class dbconnector:
     def connecttodb(self):
         config=configparser.ConfigParser()
         config.read('database.ini')
-        print(config)
         self.server=config['connection']['server']
         self.database=config['connection']['database']
         connectstring="Driver={SQL Server Native Client 11.0};Server="+self.server+";Database="+self.database+";"+"Trusted_Connection=yes;Autocommit=False"

@@ -69,8 +69,7 @@ fetchsurveys=function(evt){
 }
 
 checkvalid=function(){
-    var token=document.getElementById("system");
-    var valid=token.value>0;
+    var valid=document.getElementById("system").value>0;
     if (valid){
         var vds=document.getElementsByClassName('vds');
         var validvd=false;
@@ -100,5 +99,13 @@ window.onload = function(evt){
     var proj=document.getElementById("project");
     proj.oninput=fetchsurveys;
     proj.onchange=fetchsurveys;
+    var vds=document.getElementsByClassName('vds');
+    for(var j = 0; j < vds.length; j++){
+       vds[j].onchange=checkvalid;
+    }
+    document.getElementById("survey").onchange=checkvalid;
+    document.getElementById('project_new').onchange=checkvalid;
+    document.getElementById('survey_new').onchange=checkvalid;
+    
     
 }
