@@ -60,9 +60,10 @@ def process():
             filename = secure_filename(file.filename)
             filepath =os.path.join(app.config['UPLOAD_FOLDER'], filename) 
             file.save(filepath)
-            file=csvfile(filepath,req)
-            if not(file.finished):
-                file.importdata()
+            uploadfile=csvfile(filepath,req)
+            if not(uploadfile.finished):
+                print("starting")
+                uploadfile.importdata()
                 
 
     return(str(request.form)+'<a href="/">back</a>')
