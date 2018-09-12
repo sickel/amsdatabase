@@ -52,16 +52,16 @@ create table measurement(
     GPSSmplFlags varchar(255) not null,
     GpsError varchar(255) not null,
     GpsTime varchar(255) not null,
-    PDOP numeric not null,
-    Longitude numeric not null,
-    Latitude numeric not null,
-    GPSAltitude numeric not null,
-    AboveGroundAltitude numeric,
-    LineNum numeric,
-    adc1 numeric,
-    adc2 numeric,
-    temp numeric,
-    press numeric,
+    PDOP float not null,
+    Longitude float not null,
+    Latitude float not null,
+    GPSAltitude float not null,
+    AboveGroundAltitude float,
+    LineNum float,
+    adc1 float,
+    adc2 float,
+    temp float,
+    press float,
     location geometry 
     );
  
@@ -82,9 +82,12 @@ create table detectormeasure(
     addby varchar(100) default current_user,
     name varchar(20),
     ndet integer not null,
-    dose numeric,
-    totcount numeric,
-    spectra varchar(max)
+    dose float,
+    totcount float,
+    spectra varchar(max),
+    rawdose float,
+    livetime float,
+    vd smallint
 ) 
   
  
@@ -95,7 +98,7 @@ create table calculated(
     addby varchar(100),
     detectormeasureid integer references detectormeasure(id),
     item varchar(255) not null, 
-    val numeric not null,
+    val float not null,
     unit varchar(255)
 )
 
