@@ -86,6 +86,15 @@ class csvfile:
                     insert=insert+",location) "+values+",geometry::STGeomFromText('POINT ({} {})',4326)) "
                     # Analyze header to see that all that is needed is there...
                 if i>3:
+                    store=False
+                    for vd in vds:
+                        if self.req[vd][0]=='':
+                            continue
+                        vd=int(self.req[vd][0])
+                        store=store or int(row[roistarts[vd-1]]) > 0
+                    # no reason to store data where the detector not yet is up
+                    if not store:
+                        continue
                     lon=row[meashead["Long"]]
                     lat=row[meashead["Lat"]]
                     

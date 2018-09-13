@@ -103,7 +103,7 @@ create table calculated(
     item varchar(255) not null, 
     val float not null,
     unit varchar(255)
-)
+);
 
 
 create table updatefile(
@@ -112,9 +112,11 @@ create table updatefile(
     addby varchar(100),
     filename varchar(100) not null,
     md5 varchar(100)
-)
+);
 
-
+create table sqlfile(
+    filename varchar(50) primary key,
+    finished bit default 0 not null);
 
 insert into system(name,description) values('330-1','4x4 liter RS-500');
 insert into system(name,description) values('330-2','4x4 liter RS-500');
