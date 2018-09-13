@@ -1,8 +1,8 @@
 import hashlib
 from .dbconnector import *
 import csv
+import configparser
 
-proj="c:\\program files\\qgis 2.18\\bin\\proj.exe"
 from subprocess import Popen, PIPE
 import os
 
@@ -38,7 +38,10 @@ class csvfile:
 #print(env)
         self.projparams= ["+proj=utm","+zone="+self.req['UTMzone'][0]]
         print(self.projparams)
-
+        config=configparser.ConfigParser()
+        config.read('database.ini')
+        self.proj=config['projection']['proj']
+        print(self.proj)
         #print(self.finished)
         #print(req['VD1'][0])
         #print(req['VD2'][0])
@@ -51,12 +54,12 @@ class csvfile:
         sql = "select id from datafile where filename=? and md5=?"
         self.db.cursor.execute(sql,[self.filename,self.md5])
         fileid=self.db.cursor.fetchall()[0][0]
-        args=[proj]
+        args=[self.proj]
         args.extend(self.projparams)
 
         with open(self.filename,'r') as csvfile:
             breaking = True
-            breaking = False
+            #breaking = False
             csvreader = csv.reader(csvfile,delimiter=",")
             i= 0
             header=[]
@@ -115,6 +118,9 @@ class csvfile:
                     projcoord=projcoord.encode()
                     process = Popen(args,env=env,stdin=PIPE,stdout=PIPE)
                     utmcoord=process.communicate(input=projcoord)[0].decode()
+                    if breaking:
+                        print(projcoord)
+                        print(utmcoord)
                     process.kill()
                     params=[fileid]
                     params.append(row[meashead["SeqNum"]]) 
