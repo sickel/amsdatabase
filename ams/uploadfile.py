@@ -46,9 +46,7 @@ class csvfile:
             csvreader = csv.reader(csvfile,delimiter=",")
             i= 0
             header=[]
-            insert="insert into measurement(datafileid,seqnum,systemtime,aqutimeus,GPSSmplFlags,GpsError,GpsTime,PDOP,longitude,\
-            latitude,GPSAltitude,LineNum,adc1,adc2,temp,press,location) \
-            values(?,?,convert(datetime,?,103),?,?,?,convert(datetime,?,103),?,?,?,?,?,?,?,?,?,geometry::STGeomFromText('POINT ({} {})',4326))"
+            insmeas="insert into detectormeasure (measurementid,vd,ndet, livetime, rawdose, dose,totcount,spectra) values(?,?,?,?,?,?,?,?) "
             vds=['VD1','VD2','VD3','VD4']
             for row in csvreader:
                 i=i+1
@@ -60,6 +58,10 @@ class csvfile:
                         break # Makes no sense to continue if no GPS data
                     roistarts=[i for i, s in enumerate(top) if 'ROI for Virtual Detector' in s]
                     spectrumstarts = [i for i, s in enumerate(top) if 'Spectrum VD' in s]
+                    try:
+                        specchs=spectrumstarts[1]-spectrumstarts[0]
+                    except IndexError as error:
+                        specchs=1025 # Must be one extra
                     vdstart = [idx for idx, s in enumerate(top) if '[1]' in s][0]
                     print(roistarts)
                     print(spectrumstarts)
@@ -113,16 +115,26 @@ class csvfile:
                     self.db.cursor.execute("select IDENT_CURRENT('measurement')")
                     id=self.db.cursor.fetchall()
                     measid=id[0][0]
-                    print(measid)
+                    if i%100==0:
+                        print(i,measid)
                     for vd in vds:
                         if self.req[vd][0]=='':
                             continue
                         vd=int(self.req[vd][0])
                         roi=roistarts[vd-1]
-                        params=[measid]
-                        params.append(row)
-                        break # Jumps out if no data for this VD
+                        params=[measid,vd]
+                        params.extend(row[roi:roi+5]) # DetCount, LiveTime, Raw Doserate, Doserate TotCount[cps]
+                        specst=spectrumstarts[vd-1]
+                        spectrum=":".join(row[specst:specst+specchs])
+                        params.append(spectrum)
+                        # print("VD"+str(vd))
+                        self.db.cursor.execute(insmeas,params)
+                        #break # Jumps out if no data for this VD
                 if i > 10 and breaking:
                     break
-            self.db.cursor.commit()        
+            sql="update datafile set finished = 1 where id = ?"
+            self.db.cursor.execute(sql,fileid)
+            self.db.cursor.commit()
+            message="Uploaded OK"
+            return(message)
         # location="geometry::STGeomFromText('POINT ("+str(sample["LONGITUDE"])+" "+str(sample["LATITUDE"])+")',4326)"

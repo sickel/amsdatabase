@@ -29,6 +29,7 @@ create table survey(
     addby varchar(100) default current_user
 );
 
+alter table survey add constraint UK_surveyname unique  (name);
 
 create table datafile(
     id integer primary key not null IDENTITY(1,1),
@@ -36,7 +37,8 @@ create table datafile(
     md5 varchar(100),
     surveyid integer not null references survey(id),
     addtime datetime default current_timestamp,
-    addby varchar(100) default current_user
+    addby varchar(100) default current_user,
+    finished bit default 0 not null
     );
 
 alter table datafile add constraint UK_datafilename unique  (filename);
@@ -61,7 +63,7 @@ create table measurement(
     adc1 float,
     adc2 float,
     temp float,
-    press float,
+    pres float,
     location geometry 
     );
  
@@ -88,6 +90,7 @@ create table detectormeasure(
     rawdose float,
     livetime float,
     vd smallint
+    measurementid integer references measurement(id)
 ) 
   
  

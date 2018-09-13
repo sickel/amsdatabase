@@ -1,4 +1,5 @@
 import os
+import pyodbc
 from xlrd import open_workbook
 from flask import Flask, render_template, request, redirect, url_for, flash, session, abort, Response,send_from_directory,jsonify
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user ,current_user
@@ -40,20 +41,37 @@ def process():
     db.connecttodb() 
     if request.form["project_new"] != '':
         name=request.form["project_new"]
-        sql="insert into project (name) values(?)"
-        db.insert(sql,name)
+        try:
+            sql="insert into project (name) values(?)"
+            db.insert(sql,name)
+        except pyodbc.IntegrityError:
+            pass # takes care of this in next line
         projectid=db.name2id(name,"project")
         req['project']=projectid
+        # sql="create view "+project_vv+" as select * from
+        projectname=name
     else:
         projectid=request.form["project"]
+        projectname=db.id2name(projectid,"project")
     if request.form["survey_new"] != '':
         name=request.form["survey_new"]
         sql="insert into survey (name,projectid,systemid) values(?,?,?)"
-        db.insert(sql,[name,projectid,request.form["system"]])
+        try:
+            db.insert(sql,[name,projectid,request.form["system"]])
+        except pyodbc.IntegrityError:
+            pass # takes care of this in next line
         surveyid=db.name2id(name,"survey")
         req['survey']=surveyid
+        surveyname=name
+        viewname="av_"+projectname.replace(" ","_")+"_"+surveyname.replace(" ","_")
+        sql="create view "+viewname+" as select measurement.* from measurement right join datafile on datafile.id=datafileid where datafile.surveyid="+str(surveyid)
+        db.cursor.execute(sql)
+        sql="insert into geometry_columns values('ams','dbo',?,'location',2,4326,'POINT')"
+        db.cursor.execute(sql,[viewname])
+        db.cursor.commit()
     else:
         surveyid=request.form["survey"]
+        surveyname=db.id2name(surveyid,"survey")
     if request.method == 'POST':
         file = request.files['file']
         if file and allowed_file(file.filename):
