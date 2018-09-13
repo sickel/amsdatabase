@@ -2,6 +2,10 @@ import hashlib
 from .dbconnector import *
 import csv
 
+proj="c:\\program files\\qgis 2.18\\bin\\proj.exe"
+from subprocess import Popen, PIPE
+import os
+
 
 class csvfile:
 
@@ -31,15 +35,25 @@ class csvfile:
             self.db.cursor.execute(sql,[self.filename,self.md5,req['survey'][0]])
             self.db.cursor.commit()
         self.finished= True in res
+#print(env)
+        self.projparams= ["+proj=utm","+zone="+self.req['UTMzone'][0]]
+        print(self.projparams)
+
         #print(self.finished)
         #print(req['VD1'][0])
         #print(req['VD2'][0])
     
     
     def importdata(self):
+        env=os.environ.copy()
+        env["PROJ_LIB"]="c:\\OSGeo4W64\\share\\proj"
+
         sql = "select id from datafile where filename=? and md5=?"
         self.db.cursor.execute(sql,[self.filename,self.md5])
         fileid=self.db.cursor.fetchall()[0][0]
+        args=[proj]
+        args.extend(self.projparams)
+
         with open(self.filename,'r') as csvfile:
             breaking = True
             breaking = False
@@ -83,7 +97,7 @@ class csvfile:
                         insert=insert+",Pres,Temp"
                         values=values+",?,?"
                         pres=True
-                    insert=insert+",location) "+values+",geometry::STGeomFromText('POINT ({} {})',4326)) "
+                    insert=insert+",location,location_utm) "+values+",geometry::STGeomFromText('POINT ({} {})',4326),geometry::STGeomFromText('POINT ({})',32633)) "
                     # Analyze header to see that all that is needed is there...
                 if i>3:
                     store=False
@@ -97,7 +111,11 @@ class csvfile:
                         continue
                     lon=row[meashead["Long"]]
                     lat=row[meashead["Lat"]]
-                    
+                    projcoord=lon+" "+lat+""
+                    projcoord=projcoord.encode()
+                    process = Popen(args,env=env,stdin=PIPE,stdout=PIPE)
+                    utmcoord=process.communicate(input=projcoord)[0].decode()
+                    process.kill()
                     params=[fileid]
                     params.append(row[meashead["SeqNum"]]) 
                     params.append(row[meashead["UtcDate"]]+" "+row[meashead["UtcTime"]]) 
@@ -120,7 +138,7 @@ class csvfile:
                         params.append(row[meashead["Temp"]])
                     
                     params = list(map(lambda x: 0 if x == '' else x, params))
-                    self.db.cursor.execute(insert.format(lon,lat),params)
+                    self.db.cursor.execute(insert.format(lon,lat,utmcoord),params)
                     self.db.cursor.execute("select IDENT_CURRENT('measurement')")
                     id=self.db.cursor.fetchall()
                     measid=id[0][0]
