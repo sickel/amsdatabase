@@ -74,11 +74,11 @@ class dbconnector:
         # Put sql-files with updates in the sqlupdate-subfolder
         # Preferably one sql-command per file, if more, they should be separated by ;
         # There cannot be any sql-comments in those files due to simple parsing
-        filetable="datafile"  # Where information on update is stored - must contain a field "filename"
+        filetable="sqlfile"  # Where information on update is stored - must contain a field "filename"
         for script in os.listdir(scriptdir):
             if not script.endswith(".sql"):
                 continue
-            sql="select count(id) from "+filetable+" where filename=?"
+            sql="select count(*) from "+filetable+" where filename=?"
             self.cursor.execute(sql,script)
             if self.cursor.fetchall()[0][0]==0: # I.e. the file has not been run before
                 with open(scriptdir+'\\' + script,'r') as inserts:
@@ -95,7 +95,7 @@ class dbconnector:
                             print(e)
                         except pyodbc.IntegrityError as e:
                             print(e)
-                sql="insert into datafile (filename,imported,md5) values(?,1,'none')"
+                sql="insert into sqlfile (filename,finished) values(?,1)"
             self.cursor.execute(sql,script)
             self.cursor.commit()
                    
@@ -143,3 +143,13 @@ class dbconnector:
         self.cursor.execute(sql,name)
         list=self.cursor.fetchall()
         return(list[0][0])
+        
+    def id2name(self,id,table=None):
+        if table==None:
+            table=self.tablename
+        sql="select name from "+table+" where id =?"
+        self.cursor.execute(sql,id)
+        list=self.cursor.fetchall()
+        return(list[0][0])
+        
+     
