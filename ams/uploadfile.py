@@ -59,7 +59,7 @@ class csvfile:
 
         with open(self.filename,'r') as csvfile:
             breaking = True
-            #breaking = False
+            breaking = False
             csvreader = csv.reader(csvfile,delimiter=",")
             i= 0
             header=[]
@@ -92,15 +92,16 @@ class csvfile:
                     values=" values(?,?,convert(datetime,?,103),?,?,?,convert(datetime,?,103),?,?,?,?,?"
                     adcs=False
                     pres=False
-                    if "ADC 1" in  header:
+                    if "ADC 1" in  header: # ADCs - for altitude measurement May or may not be exported
                         insert=insert+",adc1,adc2"
                         values=values+",?,?"
                         adcs=True
-                    if "Pres" in header:
+                    if "Pres" in header: # Pressure and temperature
                         insert=insert+",Pres,Temp"
                         values=values+",?,?"
                         pres=True
-                    insert=insert+",location,location_utm) "+values+",geometry::STGeomFromText('POINT ({} {})',4326),geometry::STGeomFromText('POINT ({})',32633)) "
+                    #insert=insert+",location,location_utm) "+values+",geometry::STGeomFromText('POINT ({} {})',4326),geometry::STGeomFromText('POINT ({})',32633)) "
+                    insert=insert+",location_utm) "+values+",geometry::STGeomFromText('POINT ({})',32633)) "
                     # Analyze header to see that all that is needed is there...
                 if i>3:
                     store=False
@@ -144,8 +145,9 @@ class csvfile:
                         params.append(row[meashead["Temp"]])
                     
                     params = list(map(lambda x: 0 if x == '' else x, params))
-                    self.db.cursor.execute(insert.format(lon,lat,utmcoord),params)
-                    self.db.cursor.execute("select IDENT_CURRENT('measurement')")
+                    #self.db.cursor.execute(insert.format(lon,lat,utmcoord),params)
+                    self.db.cursor.execute(insert.format(utmcoord),params) # Using format to insert coordinates in the Geom from text - normal parameters do not work here
+                    self.db.cursor.execute("select IDENT_CURRENT('measurement')") # Get last id - may fail 
                     id=self.db.cursor.fetchall()
                     measid=id[0][0]
                     if i%100==0:

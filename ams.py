@@ -38,7 +38,8 @@ app.jinja_env.lstrip_blocks = True
 def process():
     req=dict(request.form)
     db=dbconnector()
-    db.connecttodb() 
+    db.connecttodb()
+    utm=req['UTMzone'][0]
     if request.form["project_new"] != '':
         name=request.form["project_new"]
         try:
@@ -47,9 +48,15 @@ def process():
         except pyodbc.IntegrityError:
             pass # takes care of this in next line
         projectid=db.name2id(name,"project")
-        req['project']=projectid
+        req['project']=[projectid] # must be a list to make it compatible with a selected project
         # sql="create view "+project_vv+" as select * from
         projectname=name
+        viewname="Project_"+projectname.replace(" ","_")
+        sql="create view "+viewname+" as select measurement.* from measurement right join datafile on datafile.id=datafileid right join survey on surveyid=survey.id where survey.projectid="+str(projectid)
+        db.cursor.execute(sql)
+        sql="insert into geometry_columns values('ams','dbo',?,'location_utm',2,326"+utm+",'POINT')"
+        db.cursor.execute(sql,[viewname])
+        db.cursor.commit()
     else:
         projectid=request.form["project"]
         projectname=db.id2name(projectid,"project")
@@ -61,12 +68,12 @@ def process():
         except pyodbc.IntegrityError:
             pass # takes care of this in next line
         surveyid=db.name2id(name,"survey")
-        req['survey']=surveyid
+        req['survey']=[surveyid] # must be a list to make it compatible with a selected survey
         surveyname=name
-        viewname="av_"+projectname.replace(" ","_")+"_"+surveyname.replace(" ","_")
+        viewname="Survey_"+projectname.replace(" ","_")+"_"+surveyname.replace(" ","_")
         sql="create view "+viewname+" as select measurement.* from measurement right join datafile on datafile.id=datafileid where datafile.surveyid="+str(surveyid)
         db.cursor.execute(sql)
-        sql="insert into geometry_columns values('ams','dbo',?,'location',2,4326,'POINT')"
+        sql="insert into geometry_columns values('ams','dbo',?,'location_utm',2,326"+utm+",'POINT')"
         db.cursor.execute(sql,[viewname])
         db.cursor.commit()
     else:
